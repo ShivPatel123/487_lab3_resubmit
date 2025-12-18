@@ -536,7 +536,7 @@ namespace ML
         }
 
         fp32 Sw = 127.0f / max_weight;
-        logDebug("Weight scale Sw = " + std::to_string(Sw) + " (max_weight = " + std::to_string(max_weight) + ")");
+        // logDebug("Weight scale Sw = " + std::to_string(Sw) + " (max_weight = " + std::to_string(max_weight) + ")");
 
         // -------------------------
         // 3.2: Use PRE-CALCULATED INPUT SCALE (Si) and ZERO POINT (zi)
@@ -547,7 +547,7 @@ namespace ML
         // COMPATIBILITY FIX: Detect "Standard" Stats (Si < 1.0, Step Size) vs "Legacy" Stats (Si > 1.0, Inverse Scale)
         // If Si is very small (e.g. 0.0039), it represents the Scale Factor. We need the Inverse Scale for our math.
         if (Si < 1.0f) {
-            logDebug("Detected Standard Calibration Stats (Si < 1.0). Inverting Si to use as Multiplier.");
+            // logDebug("Detected Standard Calibration Stats (Si < 1.0). Inverting Si to use as Multiplier.");
             if (Si > 1e-9f) {
                 Si = 1.0f / Si;
             } else {
@@ -556,14 +556,14 @@ namespace ML
         }
         i8 zi = input_stats.zi;
 
-        logDebug("Using calibrated input scale Si = " + std::to_string(Si) +
-                 ", zero point zi = " + std::to_string(static_cast<int>(zi)));
+        // logDebug("Using calibrated input scale Si = " + std::to_string(Si) +
+        //          ", zero point zi = " + std::to_string(static_cast<int>(zi)));
 
         // -------------------------
         // 3.3: Calculate BIAS SCALE (Sb)
         // -------------------------
         fp32 Sb = Si * Sw;
-        logDebug("Bias scale Sb = " + std::to_string(Sb));
+        // logDebug("Bias scale Sb = " + std::to_string(Sb));
 
         // ==========================================================================
         // SECTION 4: QUANTIZE ALL INPUTS (BEFORE CONVOLUTION LOOPS)
