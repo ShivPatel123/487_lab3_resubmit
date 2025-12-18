@@ -751,3 +751,4 @@ int main() {
 int main() {
     ML::runTests();
 }
+#endif
