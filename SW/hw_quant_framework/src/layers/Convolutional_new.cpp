@@ -336,7 +336,7 @@ namespace ML
     // ~16x less energy than fp32 multiplications!
     // ==========================================================================
 
-    void ConvolutionalLayer::computeQuantized(const LayerData &dataIn) const
+    void ConvolutionalLayer::computeQuantizedInternal(const LayerData &dataIn, bool use_hardware) const
     {
         // ==========================================================================
         // SECTION 1: LOAD CALIBRATION STATS AND IDENTIFY CURRENT LAYER
@@ -753,6 +753,16 @@ namespace ML
         //          ", Avg: " + std::to_string(output_avg));
         // logDebug("Zero outputs: " + std::to_string(zero_count) + "/" + std::to_string(output_size) +
         //          " (" + std::to_string(100.0f * zero_count / output_size) + "%)");
+    }
+
+    void ConvolutionalLayer::computeQuantized(const LayerData &dataIn) const
+    {
+        computeQuantizedInternal(dataIn, false);
+    }
+
+    void ConvolutionalLayer::computeAccelerated(const LayerData &dataIn) const
+    {
+        computeQuantizedInternal(dataIn, true);
     }
 
     // ==========================================================================
