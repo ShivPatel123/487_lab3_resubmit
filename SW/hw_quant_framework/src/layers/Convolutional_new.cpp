@@ -11,6 +11,7 @@
 #include "../Types.h"
 #include "../Utils.h"
 #include "Layer.h"
+#include "../HardwareMac.h"
 
 namespace ML
 {
@@ -608,6 +609,11 @@ namespace ML
         // Note: Biases are int32 (not int8) because they're added to accumulated sums
         // ==========================================================================
 
+        std::vector<uint16_t> mac_pairs;
+        if (use_hardware) {
+            mac_pairs.reserve(C * R * S); // Reserve space for one output calculation
+        }
+
         size_t bias_size = M; // One bias per output channel
         std::vector<i32> quantized_biases(bias_size);
 
@@ -670,13 +676,32 @@ namespace ML
                                 i8 input_val = quantized_input[input_idx];
                                 i8 weight_val = quantized_weights[weight_idx];
 
-                                // Multiply two int8 values -> produces int16 result
-                                // But we accumulate in int32 to prevent overflow
-                                // (many additions could overflow int16)
-                                accumulator += static_cast<i32>(input_val) *
-                                               static_cast<i32>(weight_val);
+                                if (use_hardware)
+                                {
+                                    // Pack operands: Weight (Upper 8) | Input (Lower 8)
+                                    uint16_t packed = (static_cast<uint16_t>(static_cast<uint8_t>(weight_val)) << 8) |
+                                                      static_cast<uint16_t>(static_cast<uint8_t>(input_val));
+                                    mac_pairs.push_back(packed);
+                                }
+                                else
+                                {
+                                    // Multiply two int8 values -> produces int16 result
+                                    // But we accumulate in int32 to prevent overflow
+                                    // (many additions could overflow int16)
+                                    accumulator += static_cast<i32>(input_val) *
+                                                   static_cast<i32>(weight_val);
+                                }
                             }
                         }
+                    }
+
+                    // Perform hardware MAC call if needed
+                    if (use_hardware && !mac_pairs.empty())
+                    {
+                        const i32 mac_sum = HardwareMac::run(mac_pairs.data(), mac_pairs.size());
+                        accumulator += mac_sum;
+                        // Clear for next accumulation
+                        mac_pairs.clear();
                     }
 
                     // ==========================================================
