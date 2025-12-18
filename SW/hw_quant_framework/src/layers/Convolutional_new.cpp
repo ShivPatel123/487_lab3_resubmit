@@ -347,10 +347,10 @@ namespace ML
         {
             // Try different possible paths for the calibration file
             std::vector<std::string> possible_paths = {
+                "calibration_stats.json",
+                "data/calibration_stats.json",
                 "calibration_stats_regen.json",
                 "data/calibration_stats_regen.json",
-                "data/calibration_stats.json",
-                "calibration_stats.json",
                 "../../../SW/Lab3/Phase_I_Calibration/calibration_stats.json",
                 "../../SW/Lab3/Phase_I_Calibration/calibration_stats.json",
                 "../SW/Lab3/Phase_I_Calibration/calibration_stats.json",
